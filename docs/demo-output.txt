@@ -1,0 +1,29 @@
+RESTAURANT ORDERING SYSTEM
+Menu
+  Burger: 2500.00 KZT
+  Pizza: 3500.00 KZT
+
+Same order, two pricing strategies
+  Regular: 3000.00 KZT
+  Student: 2700.00 KZT
+
+Receipt for Aida | TAKEAWAY
+  1 x Burger + cheese + sauce: 3000.00 KZT
+  Subtotal: 3000.00 KZT
+  Discount: 300.00 KZT
+  Total:    2700.00 KZT
+  Comment:  Please pack napkins
+
+Kitchen notification
+Kitchen: new order for Aida, 1 item(s).
+
+Customer notifications
+Aida: order status is NEW.
+Aida: order status is PREPARING.
+Aida: order status is READY.
+
+Validation example
+  Cannot change READY to NEW.
+
+Dine-in order: table 5, 2 pizzas with cheese, 7600.00 KZT
+Stored orders: 2

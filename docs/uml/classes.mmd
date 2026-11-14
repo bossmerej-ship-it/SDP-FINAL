@@ -1,0 +1,51 @@
+classDiagram
+    class Meal {
+        <<interface>>
+        +getDescription() String
+        +getPrice() BigDecimal
+    }
+    class MealCreator {
+        <<abstract>>
+        +createMeal() Meal
+    }
+    MealCreator <|-- BurgerCreator
+    MealCreator <|-- PizzaCreator
+    MealCreator ..> Meal : creates
+    Meal <|.. Burger
+    Meal <|.. Pizza
+    Meal <|.. MealDecorator
+    MealDecorator o-- Meal : wraps
+    MealDecorator <|-- Cheese
+    MealDecorator <|-- Sauce
+    class Order {
+        -List~OrderItem~ items
+        -ServiceType serviceType
+    }
+    class OrderBuilder {
+        +addItem(Meal, int) OrderBuilder
+        +build() Order
+    }
+    note for OrderBuilder "Nested class Order.Builder in Java"
+    OrderBuilder ..> Order : builds
+    Order *-- OrderItem
+    OrderItem --> Meal
+    class DiscountStrategy {
+        <<interface>>
+        +discountFor(BigDecimal) BigDecimal
+    }
+    DiscountStrategy <|.. RegularPrice
+    DiscountStrategy <|.. PercentageDiscount
+    PriceCalculator --> DiscountStrategy
+    PriceCalculator ..> Order
+    RestaurantFacade ..> MealCreator
+    RestaurantFacade ..> OrderBuilder
+    RestaurantFacade ..> PriceCalculator
+    RestaurantFacade --> OrderService
+    class OrderObserver {
+        <<interface>>
+        +onOrderChanged(OrderView) void
+    }
+    OrderService o-- OrderObserver : subscribers
+    OrderObserver <|.. KitchenObserver
+    OrderObserver <|.. CustomerObserver
+    OrderService --> OrderView : stores snapshots
