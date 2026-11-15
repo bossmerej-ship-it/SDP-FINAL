@@ -330,7 +330,6 @@ public final class WebServer implements AutoCloseable {
     private boolean safeFile(Path file) {
         Path current = webRoot;
         try {
-            // Reject links and Windows reparse points under the trusted web root.
             // Reading each component also works in restricted Windows workspaces,
             // where canonicalizing all filesystem ancestors can be denied.
             for (Path part : webRoot.relativize(file)) {

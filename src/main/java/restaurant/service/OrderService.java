@@ -60,7 +60,7 @@ public final class OrderService {
         checkNotInCallback();
         OrderView current = getOrder(id);
         if (next == current.status()) {
-            return current; // A repeated update produces no duplicate event.
+            return current;
         }
         if (!current.status().canChangeTo(next)) {
             throw new IllegalArgumentException("Cannot change " + current.status() + " to " + next + ".");
@@ -79,7 +79,7 @@ public final class OrderService {
                 try {
                     observer.onOrderChanged(order);
                 } catch (RuntimeException error) {
-                    // The order is already stored. Continue with the remaining subscribers.
+                    // A failed notification must not fail an already saved order.
                     LOG.log(System.Logger.Level.WARNING,
                             "Order observer failed: " + error.getMessage());
                 }
