@@ -599,14 +599,6 @@ nav a>span {
   max-width: 900px;
   margin: 20px auto;
 }
-.footer {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 18px 36px 24px;
-  font-size: 14px;
-  color: var(--muted);
-  letter-spacing: .1px;
-}
 .orders-page,.kitchen-page {
   max-width: 1440px;
   margin: 0 auto;
@@ -1097,10 +1089,6 @@ nav a>span {
   .menu-note {
     font-size: 14px;
     padding-bottom: 6px;
-  }
-  .footer {
-    padding: 18px 20px 24px;
-    font-size: 14px;
   }
   .orders-page,.kitchen-page {
     padding: 30px 20px;

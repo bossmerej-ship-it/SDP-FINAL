@@ -8,7 +8,6 @@ import restaurant.api.MenuEntry;
 import restaurant.api.OrderView;
 import restaurant.pricing.PriceBreakdown;
 
-/** Small output-only serializer for the application's known immutable view types. */
 final class Json {
     private Json() { }
 

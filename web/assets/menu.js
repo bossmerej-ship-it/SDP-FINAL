@@ -43,7 +43,7 @@ export async function startMenu() {
   }
   function body(preview = false) {
     const data = new URLSearchParams();
-    data.set('customer', preview ? 'Предпросмотр' : form.elements.customer.value.trim());
+    data.set('customer', preview ? 'Preview' : form.elements.customer.value.trim());
     data.set('serviceType', preview ? 'TAKEAWAY' : form.elements.serviceType.value);
     if (!preview && form.elements.serviceType.value === 'DINE_IN') data.set('tableNumber', form.elements.tableNumber.value);
     data.set('comment', preview ? '' : form.elements.comment.value.trim());
@@ -68,7 +68,7 @@ export async function startMenu() {
       setTotals(price); quoting = false;
     } catch (error) {
       if (revision !== quoteRevision) return;
-      message('#checkout-error', error.message + ' Измени заказ или обнови страницу для перерасчёта.');
+      message('#checkout-error', error.message + ' Change your cart or refresh the page to recalculate.');
       // Submission stays disabled until a fresh server quote succeeds.
       quoting = true;
     } finally {
@@ -81,11 +81,11 @@ export async function startMenu() {
     cart.forEach((item, index) => {
       const row = $('#cart-item-template').content.cloneNode(true);
       $('h3', row).textContent = names[item.meal];
-      $('.item-toppings', row).textContent = [item.cheese ? `Сыр ×${item.cheese}` : '', item.sauce ? `Соус ×${item.sauce}` : ''].filter(Boolean).join(', ') || 'Без добавок';
+      $('.item-toppings', row).textContent = [item.cheese ? `Cheese ×${item.cheese}` : '', item.sauce ? `Sauce ×${item.sauce}` : ''].filter(Boolean).join(', ') || 'No toppings';
       $('.line-price', row).textContent = money((prices[item.meal] + item.cheese * extras.cheese + item.sauce * extras.sauce) * item.quantity);
       const input = $('input', row);
       input.value = item.quantity; input.dataset.focus = `quantity-${index}`;
-      input.setAttribute('aria-label', `Количество: ${names[item.meal]}, позиция ${index + 1}`);
+      input.setAttribute('aria-label', `Quantity for ${names[item.meal]}, item ${index + 1}`);
       input.addEventListener('change', () => {
         if (!input.reportValidity()) { controls(); return; }
         cart[index].quantity = Number(input.value); save(); renderCart(); quote();
@@ -93,25 +93,25 @@ export async function startMenu() {
       const buttons = row.querySelectorAll('[data-step]');
       buttons[0].dataset.focus = `decrease-${index}`;
       buttons[1].dataset.focus = `increase-${index}`;
-      buttons[0].setAttribute('aria-label', `Уменьшить количество: позиция ${index + 1}`);
-      buttons[1].setAttribute('aria-label', `Увеличить количество: позиция ${index + 1}`);
-      $('.remove-item', row).setAttribute('aria-label', `Убрать ${names[item.meal]}, позиция ${index + 1}`);
+      buttons[0].setAttribute('aria-label', `Decrease quantity for item ${index + 1}`);
+      buttons[1].setAttribute('aria-label', `Increase quantity for item ${index + 1}`);
+      $('.remove-item', row).setAttribute('aria-label', `Remove ${names[item.meal]}, item ${index + 1}`);
       $('.remove-item', row).addEventListener('click', () => {
         cart.splice(index, 1); save(); renderCart(); quote();
         $('#cart-title').focus({ preventScroll: true });
-        $('#cart-announcement').textContent = 'Позиция удалена из заказа.';
+        $('#cart-announcement').textContent = 'Item removed from your cart.';
       });
       fragment.append(row);
     });
     if (!cart.length) {
       const empty = document.createElement('div'); empty.className = 'empty-cart';
-      const title = document.createElement('h3'); title.textContent = 'Здесь будет что-то вкусное';
-      const text = document.createElement('p'); text.textContent = 'Добавь блюдо из меню, а затем оформи заказ.';
+      const title = document.createElement('h3'); title.textContent = 'Your cart is empty';
+      const text = document.createElement('p'); text.textContent = 'Add a meal from the menu to place an order.';
       empty.append(title, text); fragment.append(empty);
     }
     $('#cart-items').replaceChildren(fragment);
     const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    $('#cart-count').textContent = count ? `Блюд в заказе: ${count}` : 'Пока пусто';
+    $('#cart-count').textContent = count ? `Items in cart: ${count}` : '0 items';
     $('#mobile-count').textContent = count;
     if (focus) $(`[data-focus="${focus}"]`)?.focus({ preventScroll: true });
     controls();
@@ -133,12 +133,12 @@ export async function startMenu() {
       const cheese = Number(card.elements.cheese.value), sauce = Number(card.elements.sauce.value);
       const same = cart.find(item => item.meal === meal && item.cheese === cheese && item.sauce === sauce);
       if (same && same.quantity === 99 || !same && cart.length === 30) {
-        message('#page-error', 'Этот заказ уже большой. Максимум 30 позиций и 99 блюд в каждой.'); return;
+        message('#page-error', 'Your cart can hold up to 30 items, with a quantity of up to 99 for each.'); return;
       }
       if (same) same.quantity++;
       else cart.push({ meal, cheese, sauce, quantity: 1 });
       message('#page-error'); save(); renderCart(); quote();
-      $('#cart-announcement').textContent = `В заказ добавлено: ${names[meal]}. Блюд в заказе: ${cart.reduce((sum, item) => sum + item.quantity, 0)}.`;
+      $('#cart-announcement').textContent = `Added to your cart: ${names[meal]}. Items in cart: ${cart.reduce((sum, item) => sum + item.quantity, 0)}.`;
     });
     cardPrice();
   }
@@ -148,11 +148,11 @@ export async function startMenu() {
     event.preventDefault();
     if (creating || quoting || !cart.length) return;
     if (!form.elements.customer.value.trim()) {
-      form.elements.customer.setCustomValidity('Введи имя.'); form.reportValidity(); return;
+      form.elements.customer.setCustomValidity('Enter your name.'); form.reportValidity(); return;
     }
     if (!form.reportValidity()) return;
     creating = true; controls(); message('#checkout-error');
-    $('span', submit).textContent = 'Отправляем…';
+    $('span', submit).textContent = 'Placing order…';
     const data = body(), serialized = data.toString();
     const key = orderKey(serialized);
     try {
@@ -161,7 +161,7 @@ export async function startMenu() {
       window.location.assign('/orders?placed=' + encodeURIComponent(order.id));
     } catch (error) {
       message('#checkout-error', error.message); creating = false; controls();
-      $('span', submit).textContent = 'Оформить заказ';
+      $('span', submit).textContent = 'Place order';
     }
   });
   service(); renderCart(); await quote();

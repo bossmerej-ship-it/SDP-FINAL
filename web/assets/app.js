@@ -2,7 +2,6 @@ import { $, connect, message } from './shared.js';
 import { startMenu } from './menu.js';
 import { startOrders } from './orders.js';
 
-// Native number inputs retain arrow-key support; the buttons are a pointer shortcut.
 document.addEventListener('click', event => {
   const button = event.target.closest('[data-step]');
   if (!button || button.disabled) return;
@@ -18,5 +17,5 @@ try {
   else await startOrders(document.body.dataset.page === 'kitchen');
 } catch (error) {
   $('#loading').hidden = true;
-  message('#page-error', error.message + ' Обнови страницу, чтобы повторить загрузку.');
+  message('#page-error', error.message + ' Refresh the page to try again.');
 }

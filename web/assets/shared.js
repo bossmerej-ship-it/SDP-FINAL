@@ -1,8 +1,8 @@
 let csrfToken = '';
-const numberFormat = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
+const numberFormat = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 export const money = value => numberFormat.format(Number(value)) + ' ₸';
-export const names = { burger: 'Бургер', pizza: 'Пицца' };
-export const statuses = { NEW: 'Принят', PREPARING: 'Готовится', READY: 'Готов' };
+export const names = { burger: 'Burger', pizza: 'Pizza' };
+export const statuses = { NEW: 'Accepted', PREPARING: 'Preparing', READY: 'Ready' };
 export const $ = (selector, root = document) => root.querySelector(selector);
 
 export async function request(path, form, idempotencyKey) {
@@ -20,11 +20,11 @@ export async function request(path, form, idempotencyKey) {
       credentials: 'same-origin', cache: 'no-store', signal: controller.signal
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Не удалось выполнить действие. Попробуй ещё раз.');
+    if (!response.ok) throw new Error(data.error || 'Something went wrong. Try again.');
     return data;
   } catch (error) {
     if (error instanceof TypeError || error.name === 'AbortError') {
-      throw new Error('Нет ответа от ресторана. Проверь соединение и попробуй ещё раз.');
+      throw new Error('The server did not respond. Check your connection and try again.');
     }
     throw error;
   } finally { clearTimeout(timeout); }
@@ -48,9 +48,4 @@ export function readStorage(key, fallback) {
 export function writeStorage(key, value) {
   try { sessionStorage.setItem(key, JSON.stringify(value)); }
   catch { /* The ordering flow still works when browser storage is unavailable. */ }
-}
-
-export function describe(text) {
-  return text.replaceAll('Burger', 'Бургер').replaceAll('Pizza', 'Пицца')
-    .replaceAll('cheese', 'сыр').replaceAll('sauce', 'соус');
 }

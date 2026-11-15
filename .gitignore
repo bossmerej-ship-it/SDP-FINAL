@@ -2,5 +2,3 @@ out/
 target/
 .DS_Store
 tmp/
-.frontend-workbench/
-/output/design/

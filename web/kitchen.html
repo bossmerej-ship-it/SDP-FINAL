@@ -1,21 +1,21 @@
 <!doctype html>
-<html lang="ru">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#155b39"><title>Кухня — Ресторан</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/assets/styles.css"><script src="/assets/app.js" type="module"></script></head>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#155b39"><title>Kitchen | Restaurant</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/assets/styles.css"><script src="/assets/app.js" type="module"></script></head>
 <body data-page="kitchen">
-  <a class="skip-link" href="#main">К содержимому</a>
-  <header class="topbar"><div class="nav-wrap"><a class="brand" href="/">Ресторан<span class="brand-dot" aria-hidden="true">.</span></a><nav aria-label="Основная навигация"><a href="/">Меню</a><a href="/orders">Мои заказы</a><a href="/kitchen" aria-current="page">Кухня <span aria-hidden="true">↗</span></a></nav></div></header>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar"><div class="nav-wrap"><a class="brand" href="/">Restaurant<span class="brand-dot" aria-hidden="true">.</span></a><nav aria-label="Main navigation"><a href="/">Menu</a><a href="/orders">My Orders</a><a href="/kitchen" aria-current="page">Kitchen <span aria-hidden="true">↗</span></a></nav></div></header>
   <main id="main" class="kitchen-page">
-    <div class="page-heading heading-with-action"><div><p class="eyebrow">ЗАКАЗЫ В РАБОТЕ</p><h1>Кухня</h1><p class="subtitle">От принятого заказа до готового блюда.</p></div><button id="refresh-button" class="button secondary" type="button">Обновить <span aria-hidden="true">↻</span></button></div>
+    <div class="page-heading heading-with-action"><div><p class="eyebrow">ORDER QUEUE</p><h1>Kitchen</h1><p class="subtitle">Manage incoming orders and mark them ready.</p></div><button id="refresh-button" class="button secondary" type="button">Refresh <span aria-hidden="true">↻</span></button></div>
     <div id="page-error" class="notice error" role="alert" hidden></div>
-    <p id="loading" class="loading" role="status">Загружаем заказы…</p>
+    <p id="loading" class="loading" role="status">Loading orders…</p>
     <div id="kitchen-board" class="kitchen-board" hidden>
-      <section class="kitchen-column" data-status="NEW" aria-labelledby="new-title"><div class="column-heading"><h2 id="new-title"><span class="status-dot new" aria-hidden="true"></span>Новые</h2><span class="column-count">0</span></div><div class="column-orders"></div></section>
-      <section class="kitchen-column" data-status="PREPARING" aria-labelledby="preparing-title"><div class="column-heading"><h2 id="preparing-title"><span class="status-dot preparing" aria-hidden="true"></span>Готовятся</h2><span class="column-count">0</span></div><div class="column-orders"></div></section>
-      <section class="kitchen-column" data-status="READY" aria-labelledby="ready-title"><div class="column-heading"><h2 id="ready-title"><span class="status-dot ready" aria-hidden="true"></span>Готовы</h2><span class="column-count">0</span></div><div class="column-orders"></div></section>
+      <section class="kitchen-column" data-status="NEW" aria-labelledby="new-title"><div class="column-heading"><h2 id="new-title"><span class="status-dot new" aria-hidden="true"></span>New</h2><span class="column-count">0</span></div><div class="column-orders"></div></section>
+      <section class="kitchen-column" data-status="PREPARING" aria-labelledby="preparing-title"><div class="column-heading"><h2 id="preparing-title"><span class="status-dot preparing" aria-hidden="true"></span>Preparing</h2><span class="column-count">0</span></div><div class="column-orders"></div></section>
+      <section class="kitchen-column" data-status="READY" aria-labelledby="ready-title"><div class="column-heading"><h2 id="ready-title"><span class="status-dot ready" aria-hidden="true"></span>Ready</h2><span class="column-count">0</span></div><div class="column-orders"></div></section>
     </div>
     <p id="kitchen-announcement" class="sr-only" role="status" aria-live="polite"></p>
   </main>
   <template id="kitchen-order-template"><article class="order-card kitchen-order"><div class="order-top"><p class="eyebrow order-number"></p><span class="order-service"></span></div><h3 class="order-customer"></h3><ul class="order-meals"></ul><p class="order-comment" hidden></p><button class="button primary status-button" type="button"></button></article></template>
-  <noscript><div class="noscript notice">Включите JavaScript, чтобы загрузить заказы кухни.</div></noscript>
+  <noscript><div class="noscript notice">Enable JavaScript to load kitchen orders.</div></noscript>
 </body>
 </html>

@@ -6,7 +6,6 @@ import restaurant.observer.*;
 import restaurant.order.*;
 import restaurant.pricing.PriceBreakdown;
 
-// Presentation only. Business classes never read input or print receipts.
 public final class Demo {
     public static void main(String[] args) {
         RestaurantFacade app = new RestaurantFacade();

@@ -1,114 +1,37 @@
 # Restaurant Ordering System
 
-Учебный проект по Software Design Patterns. Java 17+, шесть паттернов,
-демонстрация полного заказа и работающий веб-интерфейс на HTML, CSS и небольшом
-vanilla JavaScript. Заказы и кухня подключены к Java через встроенный HTTP-сервер.
+A Java 17 application for ordering burgers and pizza. Customers can customize meals, place takeaway or dine-in orders, and track their progress. The kitchen board moves orders from New to Preparing to Ready.
 
-## Веб-интерфейс
+## Run locally
 
-Нужен только **JDK 17+**. Node.js, npm, Maven, Spring и базы данных для запуска не нужны.
+Install JDK 17 or later. Run the appropriate command from the project root.
 
-В Windows PowerShell из папки проекта:
+| Platform | Command |
+| --- | --- |
+| macOS or Linux | `sh ./run-web.sh` |
+| Windows PowerShell | `.\run-web.ps1` |
 
-```powershell
-.\run-web.ps1
-```
+Open [http://127.0.0.1:8080](http://127.0.0.1:8080). If the port is busy, run `sh ./run-web.sh 8081` or `.\run-web.ps1 -Port 8081` and open port 8081 instead.
 
-В macOS/Linux:
+The server runs on localhost. Orders and browser sessions are stored in memory and reset when the server stops. The kitchen board has no separate sign-in.
 
-```sh
-sh ./run-web.sh
-```
+## Project structure
 
-Откройте [http://127.0.0.1:8080](http://127.0.0.1:8080).
-При занятом порте: `.\run-web.ps1 -Port 8081` или `sh ./run-web.sh 8081`.
-В IntelliJ можно запустить `restaurant.web.WebServer.main()` с рабочей папкой,
-указывающей на корень проекта (в ней должна находиться папка `web`).
+- `web/` contains the menu, cart, order tracking, and kitchen board.
+- `src/main/java/restaurant/` contains the order model, business rules, and HTTP server.
+- `src/test/java/restaurant/` contains the Java and HTTP tests.
 
-- **Меню:** выберите блюдо и количество добавок, добавьте в корзину, укажите имя,
-  обслуживание, комментарий и при необходимости студенческую скидку.
-- **В зале:** укажите номер стола; для заказа с собой он не отправляется.
-- **Мои заказы:** заказы текущей браузерной сессии, состав, сумма и состояние.
-- **Кухня:** все заказы, кнопки «Начать готовить» и «Заказ готов».
-  Состояния обновляются автоматически каждые 5 секунд, также есть ручное обновление.
+| Pattern | Role |
+| --- | --- |
+| Factory Method | `MealCreator` and its subclasses create burgers and pizzas. |
+| Decorator | `Cheese` and `Sauce` add their price and description to a meal. |
+| Builder | `Order.Builder` validates and assembles the order details. |
+| Strategy | `PriceCalculator` uses a `DiscountStrategy` to calculate regular or discounted totals. |
+| Facade | `RestaurantFacade` coordinates menu, pricing, and order operations. |
+| Observer | `OrderService` notifies registered observers when an order is placed or changes status. |
 
-Все итоговые цены и переходы состояний проверяет Java `RestaurantFacade`.
-Повторная отправка одинакового заказа с тем же ключом не создает второй заказ.
-HTML/CSS находятся в `web/`, модули без зависимостей — в `web/assets/`,
-HTTP-слой — в `src/main/java/restaurant/web/`.
+## Run tests
 
-Это локальное учебное приложение: сервер слушает только `127.0.0.1`, кухня без
-отдельного входа. Заказы и сессии хранятся в памяти и сбрасываются после остановки.
-Для «Моих заказов» используется cookie браузера; корзина хранится в текущей вкладке.
-Изображения блюд иллюстративные, конкретный состав блюд модель не определяет.
+Use `sh ./test.sh` on macOS or Linux, or `.\test.ps1` in Windows PowerShell. If Node.js is installed, run `node --test tools/submission.test.mjs` for the browser submission retry test.
 
-## Проверка
-
-```powershell
-.\test.ps1
-```
-
-```sh
-sh ./test.sh
-```
-
-Запускаются 13 проверок предметной модели и 11 групп настоящих HTTP-тестов:
-создание/расчет, статусы кухни, сессии, валидация, CSRF, безопасные пути и повторы
-заказа, включая одновременные запросы. HTTP-тесты используют свободный порт.
-
-## Консольная демонстрация
-
-Откройте эту папку в IntelliJ IDEA, выберите JDK 17+, отметьте
-src/main/java как Sources Root и src/test/java как Test Sources Root. Запустите `restaurant.Demo.main()`.
-Нужен JDK 17 или новее. В macOS/Linux можно использовать:
-
-```sh
-sh run.sh
-sh test.sh
-```
-
-В Windows используйте запуск через IntelliJ IDEA с указанными выше корнями исходников.
-
-Для тестов в IDE запустите `restaurant.RestaurantTests.main()`.
-Тесты используют стандартную Java и проверяют расчёты, валидацию, статусы,
-события и одновременные запросы. Предупреждение `Test listener failure` ожидаемо:
-один тест намеренно подключает неисправного подписчика. Ещё одно ожидаемое
-предупреждение проверяет запрет повторного изменения заказа внутри callback.
-
-## Где находятся паттерны
-
-| Паттерн | Основные классы | Наблюдаемый результат |
-|---|---|---|
-| Factory Method | MealCreator, BurgerCreator, PizzaCreator | По коду блюда создаётся Burger или Pizza |
-| Decorator | MealDecorator, Cheese, Sauce | Добавки меняют описание и стоимость Meal |
-| Builder | Order.Builder | Заказ собирается по шагам и проходит проверку |
-| Strategy | DiscountStrategy, RegularPrice, PercentageDiscount, PriceCalculator | Один заказ стоит 3000.00 или 2700.00 KZT |
-| Facade | RestaurantFacade | placeOrder объединяет создание, расчёт и регистрацию |
-| Observer | OrderService, OrderObserver, KitchenObserver, CustomerObserver | Подписчики получают события изменения заказа |
-
-`api/` содержит Java records — компактные классы для передачи данных.
-`meal/`, `order/`, `pricing/` отвечают за бизнес-правила.
-`service/` хранит заказы и управляет статусами.
-`Demo` выводит результат. `restaurant.web` содержит HTTP-адаптер;
-предметные классы остаются независимыми от интерфейса и HTTP.
-
-## Поведение
-
-- Burger — 2500.00 KZT, Pizza — 3500.00 KZT.
-- Cheese — +300.00 KZT, Sauce — +200.00 KZT за каждую порцию блюда.
-- `regular` — обычная цена, `student` — скидка 10% на весь заказ.
-- Несколько одинаковых добавок означают несколько порций добавки.
-- Количество каждой позиции должно быть положительным.
-- TAKEAWAY не содержит номер стола. Для DINE_IN нужен положительный номер.
-- Статусы меняются NEW → PREPARING → READY. Повтор текущего статуса допустим.
-- Деньги считаются через BigDecimal. Скидка округляется до 2 знаков HALF_UP.
-- Заказы хранятся в памяти одного RestaurantFacade до завершения процесса.
-- Каждый placeOrder создаёт новый заказ. HTTP-слой поддерживает Idempotency-Key:
-  хранит последние 100 ключей каждой сессии и защищает от одновременных повторов.
-- Observer работает синхронно. Подписчики должны быстро обрабатывать событие
-  и не вызывать повторное изменение заказа из своего callback.
-
-## Защита
-
-Требование самостоятельного вклада каждого участника должно быть выполнено
-самой командой согласно правилам курса.
+Run `sh ./run.sh` on macOS or Linux to try the console version. In an IDE, run `restaurant.Demo.main()` with `src/main/java` as the source root.

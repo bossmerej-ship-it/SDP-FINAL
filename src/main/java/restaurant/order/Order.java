@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import restaurant.meal.Meal;
 
-// Builder creates a validated snapshot of the order's contents.
 public final class Order {
     private final String customer;
     private final List<OrderItem> items;

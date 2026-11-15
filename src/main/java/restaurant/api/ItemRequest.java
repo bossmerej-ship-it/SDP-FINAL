@@ -2,7 +2,6 @@ package restaurant.api;
 
 import java.util.List;
 
-// Plain input data: suitable for JSON mapping in a future HTTP controller.
 public record ItemRequest(String meal, List<String> toppings, int quantity) {
     public ItemRequest {
         if (meal == null || meal.isBlank() || quantity <= 0 || toppings == null

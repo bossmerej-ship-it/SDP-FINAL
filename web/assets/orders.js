@@ -1,18 +1,18 @@
-import { $, request, money, statuses, describe, message } from './shared.js';
+import { $, request, money, statuses, message } from './shared.js';
 
 export async function startOrders(kitchen) {
   let loading = false, mutating = false, previous = '';
   const endpoint = kitchen ? '/api/kitchen' : '/api/orders';
   const shortId = id => '#' + id.slice(0, 8).toUpperCase();
-  const service = order => order.serviceType === 'DINE_IN' ? `В зале · стол ${order.tableNumber}` : 'С собой';
+  const service = order => order.serviceType === 'DINE_IN' ? `Dine in · Table ${order.tableNumber}` : 'Takeaway';
   function fill(card, order) {
-    $('.order-number', card).textContent = 'ЗАКАЗ ' + shortId(order.id);
+    $('.order-number', card).textContent = 'ORDER ' + shortId(order.id);
     $('.order-customer', card).textContent = order.customer;
     $('.order-service', card).textContent = service(order);
     for (const item of order.items) {
       const row = document.createElement('li');
       const title = document.createElement('span'), price = document.createElement('span');
-      title.textContent = `${item.quantity} × ${describe(item.description)}`;
+      title.textContent = `${item.quantity} × ${item.description}`;
       price.textContent = money(item.lineTotal); row.append(title, price);
       $('.order-meals', card).append(row);
     }
@@ -22,9 +22,9 @@ export async function startOrders(kitchen) {
     const fragment = document.createDocumentFragment();
     if (!orders.length) {
       const box = document.createElement('div'); box.className = 'empty-state';
-      const title = document.createElement('h2'); title.textContent = 'Первый заказ ещё впереди';
-      const text = document.createElement('p'); text.textContent = 'Выбери что-нибудь в меню — принятый заказ появится здесь.';
-      const link = document.createElement('a'); link.href = '/'; link.className = 'button primary'; link.textContent = 'Открыть меню →';
+      const title = document.createElement('h2'); title.textContent = 'No orders yet';
+      const text = document.createElement('p'); text.textContent = 'Place an order from the menu to track it here.';
+      const link = document.createElement('a'); link.href = '/'; link.className = 'button primary'; link.textContent = 'View menu →';
       box.append(title, text, link); fragment.append(box);
     }
     for (const order of orders.toReversed ? orders.toReversed() : [...orders].reverse()) {
@@ -36,7 +36,7 @@ export async function startOrders(kitchen) {
         if (index === stage) step.setAttribute('aria-current', 'step');
       });
       $('.order-price strong', card).textContent = money(order.price.total);
-      if (Number(order.price.discount)) { $('.order-discount', card).textContent = `Скидка учтена: −${money(order.price.discount)}`; $('.order-discount', card).hidden = false; }
+      if (Number(order.price.discount)) { $('.order-discount', card).textContent = `Discount: −${money(order.price.discount)}`; $('.order-discount', card).hidden = false; }
       if (order.id === new URLSearchParams(location.search).get('placed')) $('.order-card', card).classList.add('recent-order');
       fragment.append(card);
     }
@@ -52,19 +52,19 @@ export async function startOrders(kitchen) {
         const button = $('.status-button', card);
         if (order.status === 'READY') {
           button.remove();
-          const done = document.createElement('p'); done.className = 'ready-label'; done.textContent = '✓ Можно забирать';
+          const done = document.createElement('p'); done.className = 'ready-label'; done.textContent = '✓ Ready to serve';
           $('.order-card', card).append(done);
         } else {
           const next = order.status === 'NEW' ? 'PREPARING' : 'READY';
-          button.textContent = next === 'PREPARING' ? 'Начать готовить →' : 'Заказ готов ✓';
-          button.setAttribute('aria-label', `${button.textContent}, заказ ${shortId(order.id)}`);
+          button.textContent = next === 'PREPARING' ? 'Start cooking →' : 'Mark ready ✓';
+          button.setAttribute('aria-label', `${button.textContent}, order ${shortId(order.id)}`);
           button.addEventListener('click', async () => {
             if (mutating) return;
             mutating = true; button.disabled = true;
             try {
               await request(`/api/orders/${encodeURIComponent(order.id)}/status`, new URLSearchParams({ status: next }));
               previous = ''; await refresh(true);
-              $('#kitchen-announcement').textContent = `Заказ ${shortId(order.id)}: ${statuses[next]}.`;
+              $('#kitchen-announcement').textContent = `Order ${shortId(order.id)}: ${statuses[next]}.`;
               const heading = $(`[data-status="${next}"] h2`); heading.tabIndex = -1; heading.focus({ preventScroll: true });
             } catch (error) { message('#page-error', error.message); button.disabled = false; }
             finally { mutating = false; }
@@ -72,7 +72,7 @@ export async function startOrders(kitchen) {
         }
         fragment.append(card);
       }
-      if (!group.length) { const empty = document.createElement('p'); empty.className = 'column-empty'; empty.textContent = 'Пока нет заказов'; fragment.append(empty); }
+      if (!group.length) { const empty = document.createElement('p'); empty.className = 'column-empty'; empty.textContent = 'No orders'; fragment.append(empty); }
       $('.column-orders', column).replaceChildren(fragment);
     }
     $('#kitchen-board').hidden = false;
@@ -86,7 +86,7 @@ export async function startOrders(kitchen) {
       const snapshot = JSON.stringify(orders);
       if (snapshot !== previous) { kitchen ? renderKitchen(orders) : renderOrders(orders); previous = snapshot; }
       message('#page-error');
-    } catch (error) { message('#page-error', error.message + ' Нажми «Обновить», чтобы повторить.'); }
+    } catch (error) { message('#page-error', error.message + ' Select Refresh to try again.'); }
     finally { loading = false; button.disabled = false; $('#loading').hidden = true; }
   }
   $('#refresh-button').addEventListener('click', () => refresh());

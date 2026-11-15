@@ -15,7 +15,6 @@ import restaurant.order.OrderItem;
 import restaurant.order.OrderStatus;
 import restaurant.pricing.PriceBreakdown;
 
-// Observer Subject and owner of the order lifecycle.
 // Synchronization keeps state and event order consistent across callers.
 public final class OrderService {
     private static final System.Logger LOG = System.getLogger(OrderService.class.getName());

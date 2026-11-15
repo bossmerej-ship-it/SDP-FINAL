@@ -11,7 +11,6 @@ import restaurant.order.*;
 import restaurant.pricing.*;
 import restaurant.service.OrderService;
 
-// The public entry point used by the demo and a future web controller.
 public final class RestaurantFacade {
     private final Map<String, MealCreator> creators = new LinkedHashMap<>();
     private final OrderService orders = new OrderService();
@@ -60,9 +59,9 @@ public final class RestaurantFacade {
             if (creator == null) {
                 throw new IllegalArgumentException("Unknown meal: " + item.meal());
             }
-            Meal meal = creator.createMeal(); // Factory Method
+            Meal meal = creator.createMeal();
             for (String topping : item.toppings()) {
-                meal = switch (topping) { // Decorator
+                meal = switch (topping) {
                     case "cheese" -> new Cheese(meal);
                     case "sauce" -> new Sauce(meal);
                     default -> throw new IllegalArgumentException("Unknown topping: " + topping);

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import restaurant.order.Order;
 import restaurant.order.OrderItem;
 
-// Strategy Context. Each request selects its own strategy.
 public final class PriceCalculator {
     private final DiscountStrategy strategy;
 

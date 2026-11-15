@@ -39,7 +39,6 @@ import restaurant.meal.Sauce;
 import restaurant.order.OrderStatus;
 import restaurant.order.ServiceType;
 
-/** Loopback-only demo server. RestaurantFacade remains the single business entry point. */
 public final class WebServer implements AutoCloseable {
     private static final int MAX_BODY = 32 * 1024;
     private static final String COOKIE = "restaurant_session";
@@ -91,10 +90,10 @@ public final class WebServer implements AutoCloseable {
             } catch (ApiError error) {
                 json(exchange, error.status, Json.object("error", error.getMessage()));
             } catch (IllegalArgumentException error) {
-                json(exchange, 400, Json.object("error", "Проверьте параметры запроса."));
+                json(exchange, 400, Json.object("error", "Check the request and try again."));
             } catch (RuntimeException error) {
                 System.getLogger(WebServer.class.getName()).log(System.Logger.Level.ERROR, "HTTP request failed", error);
-                json(exchange, 500, Json.object("error", "Не удалось выполнить запрос. Попробуйте ещё раз."));
+                json(exchange, 500, Json.object("error", "Something went wrong. Try again."));
             } catch (IOException error) {
                 System.getLogger(WebServer.class.getName()).log(System.Logger.Level.ERROR, "HTTP I/O failed", error);
                 throw error;
@@ -117,8 +116,8 @@ public final class WebServer implements AutoCloseable {
             method(exchange, "GET");
             Meal base = new Burger();
             List<MenuEntry> toppings = List.of(
-                    new MenuEntry("cheese", "Сыр", new Cheese(base).getPrice().subtract(base.getPrice())),
-                    new MenuEntry("sauce", "Соус", new Sauce(base).getPrice().subtract(base.getPrice())));
+                    new MenuEntry("cheese", "Cheese", new Cheese(base).getPrice().subtract(base.getPrice())),
+                    new MenuEntry("sauce", "Sauce", new Sauce(base).getPrice().subtract(base.getPrice())));
             json(exchange, 200, Json.object("meals", restaurant.getMenu(), "toppings", toppings, "studentDiscountPercent", 10));
         } else if (path.equals("/api/kitchen")) {
             method(exchange, "GET");
@@ -137,11 +136,11 @@ public final class WebServer implements AutoCloseable {
                 Session session = authorize(exchange);
                 String body = readBody(exchange);
                 String key = exchange.getRequestHeaders().getFirst("Idempotency-Key");
-                if (key != null && !key.matches("[A-Za-z0-9._:-]{1,128}")) throw bad("Некорректный ключ повторной отправки.");
+                if (key != null && !key.matches("[A-Za-z0-9._:-]{1,128}")) throw bad("This order could not be submitted. Refresh the page and try again.");
                 synchronized (session) {
                     Replay replay = key == null ? null : session.replays.get(key);
                     if (replay != null) {
-                        if (!replay.body.equals(body)) throw new ApiError(409, "Этот ключ отправки уже использован для другого заказа.");
+                        if (!replay.body.equals(body)) throw new ApiError(409, "The retry does not match the original order. Check My Orders before trying again.");
                         json(exchange, 201, replay.order);
                         return;
                     }
@@ -166,13 +165,13 @@ public final class WebServer implements AutoCloseable {
                 method(exchange, "POST");
                 authorize(exchange);
                 Map<String, List<String>> form = form(exchange);
-                if (!form.keySet().equals(Set.of("status"))) throw bad("Укажите новый статус заказа.");
+                if (!form.keySet().equals(Set.of("status"))) throw bad("Choose a new order status.");
                 OrderStatus next;
                 try { next = OrderStatus.valueOf(scalar(form, "status", true)); }
-                catch (IllegalArgumentException error) { throw bad("Неизвестный статус заказа."); }
+                catch (IllegalArgumentException error) { throw bad("Choose a valid order status."); }
                 findOrder(parts[0]);
                 try { json(exchange, 200, restaurant.updateStatus(parts[0], next)); }
-                catch (IllegalArgumentException error) { throw new ApiError(409, "Этот переход статуса недоступен. Обновите список заказов."); }
+                catch (IllegalArgumentException error) { throw new ApiError(409, "The order cannot move to that status. Refresh the order list and try again."); }
             } else throw missing();
         } else throw missing();
     }
@@ -186,11 +185,11 @@ public final class WebServer implements AutoCloseable {
         Session session = session(exchange);
         String token = exchange.getRequestHeaders().getFirst("X-CSRF-Token");
         if (session == null || token == null || !MessageDigest.isEqual(session.csrf.getBytes(StandardCharsets.UTF_8), token.getBytes(StandardCharsets.UTF_8))) {
-            throw new ApiError(403, "Сессия устарела. Обновите страницу и повторите действие.");
+            throw new ApiError(403, "Your session has expired. Refresh the page and try again.");
         }
         List<String> origins = exchange.getRequestHeaders().get("Origin");
         if (origins != null && (origins.size() != 1 || !sameOrigin(exchange, origins.get(0)))) {
-            throw new ApiError(403, "Запрос с другого сайта запрещён.");
+            throw new ApiError(403, "Open the restaurant page directly and try again.");
         }
         return session;
     }
@@ -232,61 +231,61 @@ public final class WebServer implements AutoCloseable {
     private String readBody(HttpExchange exchange) throws IOException {
         String type = exchange.getRequestHeaders().getFirst("Content-Type");
         if (type == null || !type.split(";", 2)[0].strip().equalsIgnoreCase("application/x-www-form-urlencoded")) {
-            throw new ApiError(415, "Используйте форму application/x-www-form-urlencoded.");
+            throw new ApiError(415, "Send the request as application/x-www-form-urlencoded.");
         }
         byte[] body = exchange.getRequestBody().readNBytes(MAX_BODY + 1);
-        if (body.length > MAX_BODY) throw new ApiError(413, "Заказ слишком большой. Максимальный размер запроса — 32 КБ.");
+        if (body.length > MAX_BODY) throw new ApiError(413, "The request is too large. The maximum size is 32 KB.");
         try {
             return StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
                     .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(body)).toString();
-        } catch (CharacterCodingException error) { throw bad("Используйте кодировку UTF-8."); }
+        } catch (CharacterCodingException error) { throw bad("Send the request in UTF-8."); }
     }
 
     private static Map<String, List<String>> parseForm(String body) {
         Map<String, List<String>> values = new LinkedHashMap<>();
         if (body.isEmpty()) return values;
         String[] fields = body.split("&", -1);
-        if (fields.length > 130) throw bad("В заказе слишком много полей.");
+        if (fields.length > 130) throw bad("The order has too many fields.");
         for (String field : fields) {
             String[] pair = field.split("=", 2);
             try {
                 String name = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
                 String value = pair.length == 2 ? URLDecoder.decode(pair[1], StandardCharsets.UTF_8) : "";
                 values.computeIfAbsent(name, ignored -> new ArrayList<>()).add(value);
-            } catch (IllegalArgumentException error) { throw bad("Некорректная кодировка полей формы."); }
+            } catch (IllegalArgumentException error) { throw bad("The order form could not be read."); }
         }
         return values;
     }
 
     private OrderRequest orderRequest(Map<String, List<String>> form) {
-        if (!ORDER_FIELDS.containsAll(form.keySet())) throw bad("В форме есть неизвестные поля.");
+        if (!ORDER_FIELDS.containsAll(form.keySet())) throw bad("The order form contains unsupported fields.");
         String customer = scalar(form, "customer", true);
-        if (customer.isBlank() || customer.length() > 100) throw bad("Укажите имя длиной от 1 до 100 символов.");
+        if (customer.isBlank() || customer.length() > 100) throw bad("Enter a name between 1 and 100 characters.");
         String comment = scalar(form, "comment", false);
-        if (comment.length() > 500) throw bad("Комментарий не должен превышать 500 символов.");
+        if (comment.length() > 500) throw bad("Keep the order note within 500 characters.");
         ServiceType service;
         try { service = ServiceType.valueOf(scalar(form, "serviceType", true)); }
-        catch (IllegalArgumentException error) { throw bad("Выберите обслуживание в зале или навынос."); }
+        catch (IllegalArgumentException error) { throw bad("Choose dine in or takeaway."); }
         String tableValue = scalar(form, "tableNumber", false);
         Integer table = null;
-        if (service == ServiceType.DINE_IN) table = integer(tableValue, 1, 9999, "Укажите номер стола от 1 до 9999.");
-        else if (!tableValue.isBlank()) throw bad("Для заказа навынос номер стола не нужен.");
+        if (service == ServiceType.DINE_IN) table = integer(tableValue, 1, 9999, "Enter a table number between 1 and 9999.");
+        else if (!tableValue.isBlank()) throw bad("Leave the table number blank for takeaway.");
         String discount = scalar(form, "discount", true);
-        if (!discount.equals("regular") && !discount.equals("student")) throw bad("Выберите обычную или студенческую цену.");
+        if (!discount.equals("regular") && !discount.equals("student")) throw bad("Choose regular pricing or the student discount.");
         List<String> meals = form.getOrDefault("meal", List.of());
-        if (meals.isEmpty() || meals.size() > 30) throw bad("Добавьте от 1 до 30 позиций в заказ.");
+        if (meals.isEmpty() || meals.size() > 30) throw bad("Add between 1 and 30 items to your order.");
         for (String field : List.of("quantity", "cheese", "sauce")) {
-            if (form.getOrDefault(field, List.of()).size() != meals.size()) throw bad("У каждой позиции должны быть количество и добавки.");
+            if (form.getOrDefault(field, List.of()).size() != meals.size()) throw bad("Each item needs a quantity and a count for each topping.");
         }
         Set<String> mealCodes = restaurant.getMenu().stream().map(MenuEntry::code).collect(java.util.stream.Collectors.toSet());
         List<ItemRequest> items = new ArrayList<>();
         for (int i = 0; i < meals.size(); i++) {
             String meal = meals.get(i);
-            if (!mealCodes.contains(meal)) throw bad("Неизвестное блюдо. Обновите меню.");
-            int quantity = integer(form.get("quantity").get(i), 1, 99, "Количество блюда должно быть от 1 до 99.");
+            if (!mealCodes.contains(meal)) throw bad("Choose a meal from the menu. Refresh the page if needed.");
+            int quantity = integer(form.get("quantity").get(i), 1, 99, "Choose a meal quantity between 1 and 99.");
             List<String> toppings = new ArrayList<>();
             for (String topping : List.of("cheese", "sauce")) {
-                int count = integer(form.get(topping).get(i), 0, 20, "Количество каждой добавки должно быть от 0 до 20.");
+                int count = integer(form.get(topping).get(i), 0, 20, "Choose between 0 and 20 portions of each topping.");
                 for (int j = 0; j < count; j++) toppings.add(topping);
             }
             items.add(new ItemRequest(meal, toppings, quantity));
@@ -304,7 +303,7 @@ public final class WebServer implements AutoCloseable {
     private static String scalar(Map<String, List<String>> form, String name, boolean required) {
         List<String> values = form.get(name);
         if (values == null && !required) return "";
-        if (values == null || values.size() != 1) throw bad("Проверьте поле «" + name + "»: оно должно быть указано один раз.");
+        if (values == null || values.size() != 1) throw bad("The order form has a missing or repeated field.");
         return values.get(0);
     }
 
@@ -365,7 +364,7 @@ public final class WebServer implements AutoCloseable {
     private static void method(HttpExchange exchange, String... allowed) {
         if (!List.of(allowed).contains(exchange.getRequestMethod())) {
             exchange.getResponseHeaders().set("Allow", String.join(", ", allowed));
-            throw new ApiError(405, "Этот HTTP-метод не поддерживается.");
+            throw new ApiError(405, "This request method is not supported.");
         }
     }
 
@@ -380,7 +379,7 @@ public final class WebServer implements AutoCloseable {
     }
 
     private static ApiError bad(String message) { return new ApiError(400, message); }
-    private static ApiError missing() { return new ApiError(404, "Страница или заказ не найдены."); }
+    private static ApiError missing() { return new ApiError(404, "Page or order not found."); }
     private static final class ApiError extends RuntimeException {
         private static final long serialVersionUID = 1L;
         private final int status;

@@ -16,7 +16,6 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import restaurant.web.WebServer;
 
-/** Real HTTP integration tests. No third-party test or JSON library is required. */
 public final class WebTests {
     private static int passed;
     private static final String VALID = "customer=Aida&serviceType=TAKEAWAY&tableNumber=&comment="
@@ -147,11 +146,11 @@ public final class WebTests {
                 status(404, second.post("/api/orders/missing/status", "status=PREPARING"));
             });
             check("JSON safely escapes malicious customer strings and controls", () -> {
-                String name = "Русский <script>\"\\\n\t\u0001";
+                String name = "Café <script>\"\\\n\t\u0001";
                 String body = VALID.replace("customer=Aida", "customer=" + URLEncoder.encode(name, StandardCharsets.UTF_8));
                 var created = first.post("/api/orders", body);
                 status(201, created);
-                contains(created.body(), "Русский");
+                contains(created.body(), "Café");
                 contains(created.body(), "\\\"");
                 contains(created.body(), "\\\\");
                 contains(created.body(), "\\n");
@@ -195,7 +194,6 @@ public final class WebTests {
                 }
             });
         } finally {
-            // Only remove this test's own temporary fixture files.
             try (var files = Files.walk(root)) {
                 for (Path path : files.sorted(java.util.Comparator.reverseOrder()).toList()) Files.delete(path);
             }
