@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#155b39"><title>Мои заказы — Ресторан</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/assets/styles.css"><script src="/assets/app.js" type="module"></script></head>
+<body data-page="orders">
+  <a class="skip-link" href="#main">К содержимому</a>
+  <header class="topbar"><div class="nav-wrap"><a class="brand" href="/">Ресторан<span class="brand-dot" aria-hidden="true">.</span></a><nav aria-label="Основная навигация"><a href="/">Меню</a><a href="/orders" aria-current="page">Мои заказы</a><a href="/kitchen">Кухня <span aria-hidden="true">↗</span></a></nav></div></header>
+  <main id="main" class="orders-page">
+    <div class="page-heading heading-with-action"><div><p class="eyebrow">ОТ КУХНИ ДО ТЕБЯ</p><h1>Мои заказы</h1><p class="subtitle">Здесь можно посмотреть, как готовится твой заказ.</p></div><a class="button secondary" href="/">+ Новый заказ</a></div>
+    <div id="page-error" class="notice error" role="alert" hidden></div>
+    <p id="loading" class="loading" role="status">Загружаем заказы…</p>
+    <div id="orders-list" class="orders-grid" aria-live="polite" aria-relevant="additions text"></div>
+    <button id="refresh-button" class="button secondary refresh-button" type="button">Обновить заказы <span aria-hidden="true">↻</span></button>
+  </main>
+  <template id="order-template"><article class="order-card"><div class="order-top"><div><p class="eyebrow order-number"></p><h2 class="order-customer"></h2></div><span class="status-badge"></span></div><ol class="order-progress" aria-label="Приготовление заказа"><li>Принят</li><li>Готовится</li><li>Готов</li></ol><p class="order-service"></p><ul class="order-meals"></ul><p class="order-comment" hidden></p><div class="order-price"><span>Итого</span><strong></strong></div><p class="order-discount" hidden></p></article></template>
+  <noscript><div class="noscript notice">Включите JavaScript, чтобы загрузить заказы.</div></noscript>
+  <footer class="footer">Просто выбирай. Мы приготовим.</footer>
+</body>
+</html>

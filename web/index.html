@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#155b39">
+  <title>Меню — Ресторан</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" type="module"></script>
+</head>
+<body data-page="menu">
+  <a class="skip-link" href="#main">К содержимому</a>
+  <header class="topbar">
+    <div class="nav-wrap">
+      <a class="brand" href="/">Ресторан<span class="brand-dot" aria-hidden="true">.</span></a>
+      <nav aria-label="Основная навигация">
+        <a href="/" aria-current="page">Меню</a>
+        <a href="/orders">Мои заказы</a>
+        <a href="/kitchen">Кухня <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="workspace">
+    <section class="menu-section" aria-labelledby="menu-title">
+      <div class="page-heading">
+        <p class="eyebrow">БУРГЕРЫ И ПИЦЦА</p>
+        <h1 id="menu-title">Собери свой заказ</h1>
+        <p class="subtitle">Выбери блюдо и добавки. Всё остальное — за нами.</p>
+        <a class="mobile-cart-link" href="#cart">К заказу <span id="mobile-count">0</span> ↓</a>
+      </div>
+      <div id="page-error" class="notice error" role="alert" hidden></div>
+      <p id="loading" class="loading" role="status">Загружаем меню…</p>
+      <div class="meal-grid" id="menu-grid" hidden>
+        <form class="meal-card" data-meal="burger">
+          <div class="food-photo burger-photo" aria-hidden="true"></div>
+          <div class="meal-content">
+            <div class="meal-heading"><h2>Бургер</h2><span class="meal-price" data-base-price>—</span></div>
+            <fieldset class="toppings">
+              <legend>Добавки</legend>
+              <div class="topping-row"><label for="burger-cheese">Сыр <span data-topping-price="cheese"></span></label><div class="stepper"><button type="button" data-step="-1" aria-label="Уменьшить количество сыра для бургера">−</button><input id="burger-cheese" name="cheese" type="number" min="0" max="20" value="0" inputmode="numeric"><button type="button" data-step="1" aria-label="Добавить сыр для бургера">+</button></div></div>
+              <div class="topping-row"><label for="burger-sauce">Соус <span data-topping-price="sauce"></span></label><div class="stepper"><button type="button" data-step="-1" aria-label="Уменьшить количество соуса для бургера">−</button><input id="burger-sauce" name="sauce" type="number" min="0" max="20" value="0" inputmode="numeric"><button type="button" data-step="1" aria-label="Добавить соус для бургера">+</button></div></div>
+            </fieldset>
+            <button class="button primary add-button" type="submit" disabled>Добавить <span aria-hidden="true">·</span> <span data-add-price>—</span></button>
+          </div>
+        </form>
+        <form class="meal-card" data-meal="pizza">
+          <div class="food-photo pizza-photo" aria-hidden="true"></div>
+          <div class="meal-content">
+            <div class="meal-heading"><h2>Пицца</h2><span class="meal-price" data-base-price>—</span></div>
+            <fieldset class="toppings">
+              <legend>Добавки</legend>
+              <div class="topping-row"><label for="pizza-cheese">Сыр <span data-topping-price="cheese"></span></label><div class="stepper"><button type="button" data-step="-1" aria-label="Уменьшить количество сыра для пиццы">−</button><input id="pizza-cheese" name="cheese" type="number" min="0" max="20" value="0" inputmode="numeric"><button type="button" data-step="1" aria-label="Добавить сыр для пиццы">+</button></div></div>
+              <div class="topping-row"><label for="pizza-sauce">Соус <span data-topping-price="sauce"></span></label><div class="stepper"><button type="button" data-step="-1" aria-label="Уменьшить количество соуса для пиццы">−</button><input id="pizza-sauce" name="sauce" type="number" min="0" max="20" value="0" inputmode="numeric"><button type="button" data-step="1" aria-label="Добавить соус для пиццы">+</button></div></div>
+            </fieldset>
+            <button class="button primary add-button" type="submit" disabled>Добавить <span aria-hidden="true">·</span> <span data-add-price>—</span></button>
+          </div>
+        </form>
+      </div>
+      <p class="menu-note">Добавки можно повторять — выбери нужное количество порций.</p>
+    </section>
+
+    <aside class="cart-panel" id="cart" aria-labelledby="cart-title">
+      <div class="cart-heading"><h2 id="cart-title" tabindex="-1">Твой заказ</h2><span id="cart-count">0 позиций</span></div>
+      <div id="cart-items" class="cart-items"></div>
+      <p id="cart-announcement" class="sr-only" role="status" aria-live="polite"></p>
+      <form id="checkout-form">
+        <fieldset class="service-options">
+          <legend class="sr-only">Где будете есть?</legend>
+          <label><input type="radio" name="serviceType" value="TAKEAWAY" checked><span>С собой</span></label>
+          <label><input type="radio" name="serviceType" value="DINE_IN"><span>В зале</span></label>
+        </fieldset>
+        <div class="field" id="table-field" hidden><label for="table-number">Номер стола</label><input id="table-number" name="tableNumber" type="number" min="1" max="9999" inputmode="numeric" placeholder="Например, 5" disabled></div>
+        <div class="field"><label for="customer">Имя</label><input id="customer" name="customer" autocomplete="given-name" maxlength="100" required placeholder="Как к вам обращаться?"></div>
+        <div class="field"><label for="comment">Комментарий <span class="optional">необязательно</span></label><textarea id="comment" name="comment" rows="2" maxlength="500" placeholder="Например, положите салфетки"></textarea></div>
+        <label class="discount-option"><input type="checkbox" id="discount" name="discount" value="student"><span>Студенческая скидка <strong>−10%</strong></span></label>
+        <div class="totals" aria-live="polite" aria-atomic="true"><div><span>Сумма</span><span id="subtotal">0 ₸</span></div><div class="discount-line"><span>Скидка</span><span id="discount-total">0 ₸</span></div><div class="grand-total"><span>Итого</span><span id="total">0 ₸</span></div></div>
+        <p id="checkout-error" class="notice error" role="alert" hidden></p>
+        <button class="button primary checkout-button" id="checkout-button" type="submit" disabled><span>Оформить заказ</span><span aria-hidden="true">→</span></button>
+      </form>
+    </aside>
+  </main>
+  <template id="cart-item-template">
+    <article class="cart-item"><div class="cart-item-main"><h3></h3><p class="item-toppings"></p><button class="text-button remove-item" type="button">Убрать</button></div><div class="cart-item-side"><strong class="line-price"></strong><div class="stepper small"><button type="button" data-step="-1">−</button><input type="number" min="1" max="99" inputmode="numeric"><button type="button" data-step="1">+</button></div></div></article>
+  </template>
+  <noscript><div class="noscript notice">Для корзины и отправки заказа включите JavaScript в браузере.</div></noscript>
+  <footer class="footer">Просто выбирай. Мы приготовим.</footer>
+</body>
+</html>
